@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm
-from audio import printWAV
+from data.forms import RegistrationForm
+from sound.audio import printWAV
 import time, random, threading
 from turbo_flask import Turbo
 
