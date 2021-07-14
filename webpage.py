@@ -1,7 +1,14 @@
 from flask import Flask, render_template, url_for, flash, redirect
 from flask_sqlalchemy import SQLAlchemy
-from forms import RegistrationForm
+from data.forms import RegistrationForm
+from sound.audio import printWAV
+import time, random, threading
+from turbo_flask import Turbo
+
 app = Flask(__name__)
+interval=10
+FILE_NAME = "the rollerbladers world is limitless.wav"
+turbo = Turbo(app)
 
 app.config['SECRET_KEY'] = '525901fece4e62b2eb11fa3c1a302835'
 
@@ -16,6 +23,45 @@ class User(db.Model):
 
   def __repr__(self):
     return f"User('{self.username}', '{self.email}')"
+
+@app.before_first_request
+def before_first_request():
+    #resetting time stamp file to 0
+    file = open("pos.txt","w") 
+    file.write(str(0))
+    file.close()
+
+    #starting thread that will time updates
+    threading.Thread(target=update_captions).start()
+
+@app.context_processor
+def inject_load():
+    # getting previous time stamp
+    file = open("pos.txt","r")
+    pos = int(file.read())
+    file.close()
+
+    # writing next time stamp
+    file = open("pos.txt","w")
+    file.write(str(pos+interval))
+    file.close()
+
+    #returning captions
+    return {'caption':printWAV(FILE_NAME, pos=pos, clip=interval)}
+
+def update_captions():
+    with app.app_context():
+        while True:
+            # timing thread waiting for the interval
+            time.sleep(interval)
+
+            # forcefully updating captionsPane with caption
+            turbo.push(turbo.replace(render_template('captionsPane.html'), 'load'))
+
+@app.route("/captions")
+def captions():
+    TITLE = "the rollerbladers world is limitless"
+    return render_template('captions.html', songName=TITLE, file=FILE_NAME)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
