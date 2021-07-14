@@ -1,6 +1,6 @@
 import unittest, sys, os
 
-sys.path.append('../webpage')
+sys.path.append('../')
 from webpage import app, db
 
 class UsersTests(unittest.TestCase):
