@@ -12,4 +12,4 @@ flask_sqlalchemy
 pytest
 pycodestyle
 SpeechRecognition
-TurboFlask
+Turbo-Flask
